@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { VStack, Heading, useDisclosure } from "@chakra-ui/react"
+import { VStack, Heading, useDisclosure, Box } from "@chakra-ui/react"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { useFetchData } from "@/utils/useFetchData"
 import { useFetchBalance } from "@/utils/useFetchBalance"
@@ -8,6 +8,7 @@ import ModalWithdraw from "@/components/ModalWithdraw"
 import { useDeposit } from "@/utils/useDeposit"
 import { useWithdraw } from "@/utils/useWithdraw"
 import BalanceCard from "@/components/BalanceCard"
+import Test from "@/components/Test"
 
 export default function Link() {
   const { publicKey, sendTransaction } = useWallet()
@@ -57,25 +58,28 @@ export default function Link() {
   }, [pubKey])
 
   return (
-    <VStack justifyContent="center">
-      <Heading>Link</Heading>
-      <BalanceCard
-        pubKey={pubKey}
-        balance={balance}
-        loading={loading}
-        onDepositClick={depositDisclosure.onOpen}
-        onWithdrawClick={withdrawDisclosure.onOpen}
-      />
-      <ModalDeposit
-        isOpen={depositDisclosure.isOpen}
-        onClose={depositDisclosure.onClose}
-        handleClick={handleDepositClick}
-      />
-      <ModalWithdraw
-        isOpen={withdrawDisclosure.isOpen}
-        onClose={withdrawDisclosure.onClose}
-        handleClick={handleWithdrawClick}
-      />
-    </VStack>
+    <Box>
+      <VStack justifyContent="center">
+        <Heading>Link</Heading>
+        <BalanceCard
+          pubKey={pubKey}
+          balance={balance}
+          loading={loading}
+          onDepositClick={depositDisclosure.onOpen}
+          onWithdrawClick={withdrawDisclosure.onOpen}
+        />
+        <ModalDeposit
+          isOpen={depositDisclosure.isOpen}
+          onClose={depositDisclosure.onClose}
+          handleClick={handleDepositClick}
+        />
+        <ModalWithdraw
+          isOpen={withdrawDisclosure.isOpen}
+          onClose={withdrawDisclosure.onClose}
+          handleClick={handleWithdrawClick}
+        />
+      </VStack>
+      <Test />
+    </Box>
   )
 }
