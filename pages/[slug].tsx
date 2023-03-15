@@ -1,111 +1,109 @@
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import {
-  Heading,
   VStack,
-  Card,
-  CardBody,
+  Heading,
   Text,
-  Button,
+  HStack,
+  Spacer,
   Menu,
   MenuButton,
+  IconButton,
   MenuList,
   MenuItem,
-  IconButton,
-  Spacer,
-  HStack,
+  Card,
+  CardBody,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  Flex,
+  Spinner,
 } from "@chakra-ui/react"
-import { ChevronDownIcon, AddIcon } from "@chakra-ui/icons"
-import {
-  clusterApiUrl,
-  Connection,
-  PublicKey,
-  Transaction,
-  SystemProgram,
-  LAMPORTS_PER_SOL,
-} from "@solana/web3.js"
-import axios from "axios"
+import { Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js"
 import { useWallet } from "@solana/wallet-adapter-react"
+import { useFetchData } from "@/utils/useFetchData"
+import { useFetchBalance } from "@/utils/useFetchBalance"
+import { ModalDeposit } from "@/components/ModalDeposit"
+import { ModalWithdraw } from "@/components/ModalWithdraw"
+import { ChevronDownIcon, AddIcon, ArrowDownIcon } from "@chakra-ui/icons"
+import axios from "axios"
 
 export default function Link() {
-  const { publicKey, sendTransaction, connect } = useWallet()
-  const [pubKey, setPubKey] = useState<PublicKey>()
-  const [balance, setBalance] = useState<number>()
-  const connection = new Connection(clusterApiUrl("devnet"))
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [amount, setAmount] = useState(0)
-
-  const fetchData = useCallback(async (id: string) => {
-    const response = await axios.post("/api/keypair", { id })
-    setPubKey(new PublicKey(response.data.publicKey))
-  }, [])
+  const { publicKey, sendTransaction } = useWallet()
+  const { pubKey, fetchData } = useFetchData()
+  const { balance, fetchBalance, connection } = useFetchBalance(pubKey)
+  const depositDisclosure = useDisclosure()
+  const withdrawDisclosure = useDisclosure()
+  const [loading, setLoading] = useState(false)
+  const [id, setId] = useState("")
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const id = window.location.hash.replace("#", "")
       fetchData(id)
+      setId(id)
     }
   }, [])
 
-  const fetchBalance = async () => {
-    if (pubKey) {
-      const balance = await connection.getBalance(pubKey)
-      setBalance(balance / LAMPORTS_PER_SOL)
-      console.log(balance / LAMPORTS_PER_SOL)
-    }
-  }
-
-  async function handleClick() {
-    if (publicKey && pubKey) {
-      try {
-        console.log(amount)
-        const transaction = new Transaction().add(
-          SystemProgram.transfer({
-            fromPubkey: publicKey,
-            toPubkey: pubKey,
-            lamports: amount * LAMPORTS_PER_SOL,
-          })
-        )
-        const txSig = await sendTransaction(transaction, connection)
-        console.log(txSig)
-
-        const { blockhash, lastValidBlockHeight } =
-          await connection.getLatestBlockhash()
-
-        await connection
-          .confirmTransaction(
-            {
-              blockhash,
-              lastValidBlockHeight,
-              signature: txSig,
-            },
-            "confirmed"
-          )
-          .then(() => fetchBalance())
-
-        console.log("confirmed")
-      } catch (error) {
-        console.log(error)
-      }
-    }
-  }
-
   useEffect(() => {
     fetchBalance()
-  }, [connection, pubKey])
+  }, [pubKey])
+
+  useEffect(() => {
+    if (!pubKey) return
+    const id = connection.onAccountChange(pubKey, () => {
+      fetchBalance()
+      setLoading(false)
+    })
+
+    return () => {
+      connection.removeAccountChangeListener(id)
+    }
+  }, [pubKey])
+
+  async function handleDepositClick(amount: number) {
+    if (!publicKey || !pubKey) {
+      return
+    }
+
+    setLoading(true)
+    depositDisclosure.onClose()
+    try {
+      const lamports = amount * LAMPORTS_PER_SOL
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: publicKey,
+          toPubkey: pubKey,
+          lamports,
+        })
+      )
+
+      const txSig = await sendTransaction(transaction, connection)
+      console.log("Transaction sent:", txSig)
+
+      const { blockhash, lastValidBlockHeight } =
+        await connection.getLatestBlockhash()
+
+      await connection.confirmTransaction(
+        {
+          blockhash,
+          lastValidBlockHeight,
+          signature: txSig,
+        },
+        "confirmed"
+      )
+    } catch (error) {
+      console.log("Transaction failed:", error)
+    }
+  }
+
+  async function handleWithdrawClick(amount: number) {
+    setLoading(true)
+    const response = await axios.post("/api/withdraw", {
+      id,
+      amount,
+      publicKey,
+    })
+    console.log(response.data.txSig)
+    withdrawDisclosure.onClose()
+    alert("Withdrawal successful!")
+  }
 
   return (
     <VStack justifyContent="center">
@@ -122,7 +120,13 @@ export default function Link() {
                 variant="outline"
               />
               <MenuList>
-                <MenuItem icon={<AddIcon />} onClick={onOpen}>
+                <MenuItem
+                  icon={<ArrowDownIcon />}
+                  onClick={withdrawDisclosure.onOpen}
+                >
+                  Withdraw
+                </MenuItem>
+                <MenuItem icon={<AddIcon />} onClick={depositDisclosure.onOpen}>
                   Deposit Assets
                 </MenuItem>
               </MenuList>
@@ -130,41 +134,22 @@ export default function Link() {
           </HStack>
           <VStack>
             <Text>PubKey: {pubKey?.toString()}</Text>
-            <Text>Balance: {balance}</Text>
+            {loading ? <Spinner size="sm" /> : <Text>Balance: {balance}</Text>}
           </VStack>
         </CardBody>
       </Card>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent width={300}>
-          <ModalHeader>Deposit</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Flex justifyContent="center">
-              <NumberInput
-                onChange={(value) => setAmount(Number(value))}
-                width={100}
-                defaultValue={0}
-                precision={2}
-                step={0.01}
-              >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </Flex>
-          </ModalBody>
-
-          <ModalFooter justifyContent="center">
-            <Button mr={3} onClick={onClose}>
-              Close
-            </Button>
-            <Button onClick={handleClick}>Confirm Deposit</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <ModalDeposit
+        isOpen={depositDisclosure.isOpen}
+        onClose={depositDisclosure.onClose}
+        handleClick={handleDepositClick}
+        loading={loading}
+        setLoading={setLoading}
+      />
+      <ModalWithdraw
+        isOpen={withdrawDisclosure.isOpen}
+        onClose={withdrawDisclosure.onClose}
+        handleClick={handleWithdrawClick}
+      />
     </VStack>
   )
 }
