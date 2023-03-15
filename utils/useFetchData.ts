@@ -7,8 +7,12 @@ export function useFetchData() {
   const [pubKey, setPubKey] = useState<PublicKey>()
 
   const fetchData = useCallback(async (id: string) => {
-    const response = await axios.post("/api/keypair", { id })
-    setPubKey(new PublicKey(response.data.publicKey))
+    try {
+      const response = await axios.post("/api/keypair", { id })
+      setPubKey(new PublicKey(response.data.publicKey))
+    } catch (error) {
+      console.error("Failed to fetch data:", error)
+    }
   }, [])
 
   return { pubKey, fetchData }

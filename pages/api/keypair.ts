@@ -13,11 +13,24 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { id } = req.body
-  console.log(id)
-  const keypair = generateKeypair(id, "salt")
+  try {
+    const { id } = req.body
 
-  res.status(200).json({
-    publicKey: keypair.publicKey.toBase58(),
-  })
+    if (!id) {
+      return res.status(400).json({
+        error: "Missing or invalid 'id' parameter in request body.",
+      })
+    }
+
+    const keypair = generateKeypair(id, "salt")
+
+    res.status(200).json({
+      publicKey: keypair.publicKey.toBase58(),
+    })
+  } catch (error) {
+    console.error("Error in handler:", error)
+    res.status(500).json({
+      error: "An internal server error occurred.",
+    })
+  }
 }

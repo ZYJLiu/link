@@ -22,13 +22,17 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { id, amount, publicKey } = req.body
-  console.log(id)
-  const keypair = generateKeypair(id, "salt")
-
-  let txSig
   try {
-    const lamports = amount * LAMPORTS_PER_SOL
+    const { id, amount, publicKey } = req.body
+
+    if (!id || !amount || !publicKey) {
+      return res.status(400).json({
+        error: "Missing or invalid parameters in request body.",
+      })
+    }
+
+    const keypair = generateKeypair(id, "salt")
+    const lamports = amount * LAMPORTS_PER_SOL - 5000
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: keypair.publicKey,
@@ -37,13 +41,12 @@ export default async function handler(
       })
     )
 
-    txSig = await connection.sendTransaction(transaction, [keypair])
+    const txSig = await connection.sendTransaction(transaction, [keypair])
     console.log("Transaction sent:", txSig)
 
     const { blockhash, lastValidBlockHeight } =
       await connection.getLatestBlockhash()
-
-    await connection.confirmTransaction(
+    const confirmationStatus = await connection.confirmTransaction(
       {
         blockhash,
         lastValidBlockHeight,
@@ -51,11 +54,14 @@ export default async function handler(
       },
       "confirmed"
     )
-  } catch (error) {
-    console.log("Transaction failed:", error)
-  }
 
-  res.status(200).json({
-    txSig: txSig,
-  })
+    if (!confirmationStatus) {
+      throw new Error("Transaction confirmation failed.")
+    }
+
+    res.status(200).json({ txSig })
+  } catch (error) {
+    console.error("Error in handler:", error)
+    res.status(500).json({ error: "An internal server error occurred." })
+  }
 }

@@ -14,21 +14,19 @@ import {
   NumberDecrementStepper,
   Flex,
 } from "@chakra-ui/react"
-import { useState } from "react"
+import React, { useState } from "react"
 
-export function ModalDeposit({
-  isOpen,
-  onClose,
-  handleClick,
-  loading,
-  setLoading,
-}: {
+interface ModalDepositProps {
   isOpen: boolean
   onClose: () => void
   handleClick: (amount: number) => Promise<void>
-  loading: boolean
-  setLoading: (loading: boolean) => void
-}) {
+}
+
+const ModalDeposit: React.FC<ModalDepositProps> = ({
+  isOpen,
+  onClose,
+  handleClick,
+}) => {
   const [amount, setAmount] = useState(0)
 
   return (
@@ -43,7 +41,7 @@ export function ModalDeposit({
               onChange={(value) => setAmount(Number(value))}
               width={100}
               defaultValue={0}
-              precision={2}
+              min={0}
               step={0.01}
             >
               <NumberInputField />
@@ -58,15 +56,11 @@ export function ModalDeposit({
           <Button mr={3} onClick={onClose}>
             Close
           </Button>
-          <Button
-            // isLoading={loading}
-            // loadingText="Awaiting Confirmation"
-            onClick={() => handleClick(amount)}
-          >
-            Confirm Deposit
-          </Button>
+          <Button onClick={() => handleClick(amount)}>Confirm Deposit</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
   )
 }
+
+export default React.memo(ModalDeposit)

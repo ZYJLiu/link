@@ -10,8 +10,11 @@ import {
 import { HamburgerIcon } from "@chakra-ui/icons"
 import WalletMultiButton from "./WalletMultiButton"
 import Link from "next/link"
+import React from "react"
 
-const Navbar = () => {
+interface NavbarProps {}
+
+const Navbar: React.FC<NavbarProps> = () => {
   return (
     <Flex px={4} py={4}>
       <Menu>
@@ -24,15 +27,6 @@ const Navbar = () => {
           <MenuItem as={Link} href="/">
             Home
           </MenuItem>
-          {/* {locations.map((location) => (
-            <MenuItem
-              as={Link}
-              href={`/location/${location.index}`}
-              key={location.index}
-            >
-              Location {location.index}
-            </MenuItem>
-          ))} */}
         </MenuList>
       </Menu>
       <Spacer />
@@ -41,4 +35,4 @@ const Navbar = () => {
   )
 }
 
-export default Navbar
+export default React.memo(Navbar)

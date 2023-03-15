@@ -14,17 +14,19 @@ import {
   NumberDecrementStepper,
   Flex,
 } from "@chakra-ui/react"
-import { useState } from "react"
+import React, { useState } from "react"
 
-export function ModalWithdraw({
-  isOpen,
-  onClose,
-  handleClick,
-}: {
+interface ModalWithdrawProps {
   isOpen: boolean
   onClose: () => void
   handleClick: (amount: number) => Promise<void>
-}) {
+}
+
+const ModalWithdraw: React.FC<ModalWithdrawProps> = ({
+  isOpen,
+  onClose,
+  handleClick,
+}) => {
   const [amount, setAmount] = useState(0)
 
   return (
@@ -39,7 +41,7 @@ export function ModalWithdraw({
               onChange={(value) => setAmount(Number(value))}
               width={100}
               defaultValue={0}
-              precision={2}
+              min={0}
               step={0.01}
             >
               <NumberInputField />
@@ -54,9 +56,11 @@ export function ModalWithdraw({
           <Button mr={3} onClick={onClose}>
             Close
           </Button>
-          <Button onClick={() => handleClick(amount)}>Confirm Deposit</Button>
+          <Button onClick={() => handleClick(amount)}>Confirm Withdraw</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
   )
 }
+
+export default React.memo(ModalWithdraw)

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   clusterApiUrl,
   Connection,
@@ -7,7 +7,7 @@ import {
 } from "@solana/web3.js"
 
 export function useFetchBalance(pubKey: PublicKey | undefined) {
-  const [balance, setBalance] = useState<number>()
+  const [balance, setBalance] = useState<number>(0)
   const connection = new Connection(clusterApiUrl("devnet"))
 
   const fetchBalance = async () => {
@@ -21,6 +21,10 @@ export function useFetchBalance(pubKey: PublicKey | undefined) {
       }
     }
   }
+
+  useEffect(() => {
+    fetchBalance()
+  }, [pubKey])
 
   return { balance, fetchBalance, connection }
 }
