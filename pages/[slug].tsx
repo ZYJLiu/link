@@ -8,7 +8,7 @@ import ModalWithdraw from "@/components/ModalWithdraw"
 import { useDeposit } from "@/utils/useDeposit"
 import { useWithdraw } from "@/utils/useWithdraw"
 import BalanceCard from "@/components/BalanceCard"
-import Test from "@/components/Test"
+import TipLinkWallet from "@/components/TipLinkWallet"
 
 export default function Link() {
   const { publicKey, sendTransaction } = useWallet()
@@ -79,7 +79,7 @@ export default function Link() {
           handleClick={handleWithdrawClick}
         />
       </VStack>
-      <Test />
+      <TipLinkWallet />
     </Box>
   )
 }

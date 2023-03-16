@@ -15,11 +15,15 @@ import {
   Spacer,
   Flex,
   Icon,
+  useDisclosure,
 } from "@chakra-ui/react"
 import { AddIcon, ArrowDownIcon } from "@chakra-ui/icons"
 import { MoreVertical, Plus, ExternalLink, ArrowDown } from "react-feather"
+import TipLinkDeposit from "./TipLinkDeposit"
 
-const Test = () => {
+const TipLinkWallet = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
   return (
     <Box
       display="flex"
@@ -190,7 +194,7 @@ const Test = () => {
                   </VStack>
                 </MenuItem>
                 <Divider />
-                <MenuItem icon={<Plus />}>
+                <MenuItem icon={<Plus />} onClick={onOpen}>
                   <VStack alignItems="flex-start">
                     <Text fontWeight="medium">Deposit Assets</Text>
                     <Text fontSize="xs" color="gray.600">
@@ -225,8 +229,9 @@ const Test = () => {
           </Button>
         </VStack>
       </Box>
+      <TipLinkDeposit isOpen={isOpen} onClose={onClose} />
     </Box>
   )
 }
 
-export default Test
+export default TipLinkWallet
