@@ -6,19 +6,17 @@ import {
   ModalCloseButton,
 } from "@chakra-ui/react"
 import React, { useState } from "react"
-import TipLinkDepositDefault from "./TipLinkDepositDefault"
-import TipLinkDepositAmount from "./TipLinkDepositAmount"
+import TipLinkWithdrawDefault from "./TipLinkWithdrawDefault"
+import TipLinkWithdrawAmount from "./TipLinkWithdrawAmount"
 
 interface ModalDepositProps {
   isOpen: boolean
   onClose: () => void
-  mode?: "deposit" | "withdraw"
 }
 
 const TipLinkDepositModal: React.FC<ModalDepositProps> = ({
   isOpen,
   onClose,
-  mode,
 }) => {
   const [isOpenForm, setIsOpenForm] = useState(false)
   return (
@@ -27,12 +25,12 @@ const TipLinkDepositModal: React.FC<ModalDepositProps> = ({
       <ModalContent p={10} borderRadius="xl" opacity={1} transform="none">
         <ModalCloseButton />
         {isOpenForm ? (
-          <TipLinkDepositAmount
+          <TipLinkWithdrawAmount
             onClose={onClose}
             setIsOpenForm={setIsOpenForm}
           />
         ) : (
-          <TipLinkDepositDefault
+          <TipLinkWithdrawDefault
             onClose={onClose}
             setIsOpenForm={setIsOpenForm}
           />

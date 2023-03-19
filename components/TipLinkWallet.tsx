@@ -20,9 +20,12 @@ import {
 import { AddIcon, ArrowDownIcon } from "@chakra-ui/icons"
 import { MoreVertical, Plus, ExternalLink, ArrowDown } from "react-feather"
 import TipLinkDepositModal from "./TipLinkDepositModal"
+import TipLinkWithdrawModal from "./TipLinkWithdrawModal"
 
 const TipLinkWallet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const depositModal = useDisclosure()
+  const withdrawModal = useDisclosure()
 
   return (
     <Box
@@ -175,7 +178,7 @@ const TipLinkWallet = () => {
                 </span>
               </MenuButton>
               <MenuList>
-                <MenuItem icon={<ExternalLink />}>
+                <MenuItem icon={<ExternalLink />} isDisabled>
                   <VStack alignItems="flex-start">
                     <Text fontWeight="medium">Send</Text>
                     <Text fontSize="xs" color="gray.600">
@@ -185,7 +188,7 @@ const TipLinkWallet = () => {
                   </VStack>
                 </MenuItem>
                 <Divider />
-                <MenuItem icon={<ArrowDown />}>
+                <MenuItem icon={<ArrowDown />} onClick={withdrawModal.onOpen}>
                   <VStack alignItems="flex-start">
                     <Text fontWeight="medium">Withdraw</Text>
                     <Text fontSize="xs" color="gray.600">
@@ -194,7 +197,7 @@ const TipLinkWallet = () => {
                   </VStack>
                 </MenuItem>
                 <Divider />
-                <MenuItem icon={<Plus />} onClick={onOpen}>
+                <MenuItem icon={<Plus />} onClick={depositModal.onOpen}>
                   <VStack alignItems="flex-start">
                     <Text fontWeight="medium">Deposit Assets</Text>
                     <Text fontSize="xs" color="gray.600">
@@ -229,7 +232,14 @@ const TipLinkWallet = () => {
           </Button>
         </VStack>
       </Box>
-      <TipLinkDepositModal isOpen={isOpen} onClose={onClose} />
+      <TipLinkDepositModal
+        isOpen={depositModal.isOpen}
+        onClose={depositModal.onClose}
+      />
+      <TipLinkWithdrawModal
+        isOpen={withdrawModal.isOpen}
+        onClose={withdrawModal.onClose}
+      />
     </Box>
   )
 }
