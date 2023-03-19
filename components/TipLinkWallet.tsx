@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react"
 import { AddIcon, ArrowDownIcon } from "@chakra-ui/icons"
 import { MoreVertical, Plus, ExternalLink, ArrowDown } from "react-feather"
-import TipLinkDeposit from "./TipLinkDeposit"
+import TipLinkDepositModal from "./TipLinkDepositModal"
 
 const TipLinkWallet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -229,7 +229,7 @@ const TipLinkWallet = () => {
           </Button>
         </VStack>
       </Box>
-      <TipLinkDeposit isOpen={isOpen} onClose={onClose} />
+      <TipLinkDepositModal isOpen={isOpen} onClose={onClose} />
     </Box>
   )
 }
